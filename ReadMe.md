@@ -22,7 +22,7 @@ FS.read(stream, data, 0, size2, 0);
 FS.close(stream);
 ```
 ## See a demo
-[Click Here](https://bytwm2hc.github.io/alacConvert.js-demo/)
+[Click Here](https://bytwm2hc.github.io/ALACconvert.js/demo/)
 ## Build / Download
 It can be compiled with```emcc```and I made a file for the build command at```convert-utility/emcc-compile-command.txt```.
 
