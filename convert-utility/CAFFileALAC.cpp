@@ -18,7 +18,7 @@
 
 #include <stdio.h>
 #include "CAFFileALAC.h"
-#include "EndianPortable.h"
+#include "../codec/EndianPortable.h"
 
 #define kSizeOfChanAtomPlusChannelLayout 24
 

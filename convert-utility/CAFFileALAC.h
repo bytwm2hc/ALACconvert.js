@@ -27,7 +27,7 @@
 #define ATTRIBUTE_PACKED __attribute__((__packed__))
 #endif
 
-#include "ALACAudioTypes.h"
+#include "../codec/ALACAudioTypes.h"
 
 #define kMinCAFFPacketTableHeaderSize 24
 

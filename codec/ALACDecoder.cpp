@@ -129,7 +129,12 @@ int32_t ALACDecoder::Init( void * inMagicCookie, uint32_t inMagicCookieSize )
 
         mConfig = theConfig;
         
+		// sanity checks
         RequireAction( mConfig.compatibleVersion <= kALACVersion, return kALAC_ParamError; );
+		RequireAction(mConfig.bitDepth == 16 || mConfig.bitDepth == 20 || mConfig.bitDepth == 24 || mConfig.bitDepth == 32, return kALAC_ParamError; );
+		RequireAction(mConfig.frameLength > 0 && mConfig.frameLength <= 16384, return kALAC_ParamError; );
+		RequireAction(mConfig.sampleRate > 0 && mConfig.sampleRate <= 384000, return kALAC_ParamError; );
+		RequireAction(mConfig.numChannels > 0 && mConfig.numChannels < kALACMaxChannels, return kALAC_ParamError; );
 
         // allocate mix buffers
         mMixBufferU = (int32_t *) calloc( mConfig.frameLength * sizeof(int32_t), 1 );
@@ -251,6 +256,8 @@ int32_t ALACDecoder::Decode( BitBuffer * bits, uint8_t * sampleBuffer, uint32_t 
 				{
 					numSamples  = BitBufferRead( bits, 16 ) << 16;
 					numSamples |= BitBufferRead( bits, 16 );
+
+					RequireAction(numSamples <= mConfig.frameLength, status = kALAC_ParamError; goto Exit; );
 				}
 
 				if ( escapeFlag == 0 )
@@ -402,6 +409,8 @@ int32_t ALACDecoder::Decode( BitBuffer * bits, uint8_t * sampleBuffer, uint32_t 
 				{
 					numSamples  = BitBufferRead( bits, 16 ) << 16;
 					numSamples |= BitBufferRead( bits, 16 );
+
+					RequireAction(numSamples <= mConfig.frameLength, status = kALAC_ParamError; goto Exit; );
 				}
 
 				if ( escapeFlag == 0 )

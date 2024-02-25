@@ -23,13 +23,13 @@
 #include <string.h>
 
 // these are headers for the ALAC encoder and decoder
-#include "ALACEncoder.h"
-#include "ALACDecoder.h"
-#include "ALACBitUtilities.h"
+#include "../codec/ALACEncoder.h"
+#include "../codec/ALACDecoder.h"
+#include "../codec/ALACBitUtilities.h"
 
 // these are utility headers for this sample code
 #include "CAFFileALAC.h"
-#include "EndianPortable.h"
+#include "../codec/EndianPortable.h"
 
 #define kMaxBERSize 5
 #define kCAFFdataChunkEditsSize  4
@@ -64,32 +64,37 @@ enum
     kTestFormatFlag_32BitSourceData    = 4
 };
 
-
-int32_t main (int32_t argc, char * argv[]) 
+int32_t main (int32_t argc, char * argv[])
 {
-    char * inputFileName = argv[1];
-    char * outputFileName = argv[2];
+    return 0;
+}
+
+extern "C" {
+long GetFileSize (char * filename)
+{
+    FILE * fp = fopen(filename, "r");
+
+    if (fp == NULL)
+        return -1;
+
+    if (fseek(fp, 0, SEEK_END) < 0) {
+        fclose(fp);
+        return -1;
+    }
+
+    long size = ftell(fp);
+    // Release the resources when not required
+    fclose(fp);
+    return size;
+}
+
+int32_t ALACconvert (char * argv1, char * argv2) 
+{
+    char * inputFileName = argv1;
+    char * outputFileName = argv2;
     FILE * inputFile = NULL;
     FILE * outputFile = NULL;
-		
-	bool malformed = argc < 2;
-	
-    // Parse the commandline and open the necessary files
-    for (int32_t i = 1; i < argc; ++i) 
-	{
-		if (strcmp (argv[i], "-h") == 0)
-		{
-			malformed = true;
-		}
-		else
-		{
-			if (argv[i][0] == '-')
             {
-				printf ("unknown option: %s\n", argv[i]);
-				malformed = true;
-			}
-			else
-			{
                 if (inputFile == NULL) inputFile = fopen (inputFileName, "rb"); // the b is necessary for Windows -- ignored by Unix
                 if(inputFile == NULL)
                 {
@@ -104,16 +109,8 @@ int32_t main (int32_t argc, char * argv[])
                     exit (1);
                 }
 			}
-		}
-				
-		if (malformed)
-		{
-			break;
-		}
-	}
 	
-	if (!malformed) 
-	{
+
         printf("Input file: %s\n", inputFileName);
         printf("Output file: %s\n", outputFileName);
         // So at this point we have the input and output files open. Need to determine what we're dealing with
@@ -172,24 +169,13 @@ int32_t main (int32_t argc, char * argv[])
             }
             DecodeALAC(inputFile, outputFile, inputFormat, outputFormat, inputDataSize, outputFileType);
         }
-	}
-	
-	if (malformed) {
-		printf ("Usage:\n");
-		printf ("Encode:\n");
-		printf ("        alacconvert <input wav or caf file> <output caf file>\n");
-		printf ("Decode:\n");
-		printf ("        alacconvert <input caf file> <output wav or caf file>\n");
-		printf ("\n");
-		return 1;
-	}
 	
     if (inputFile) fclose(inputFile);
     if (outputFile) fclose(outputFile);
     
 	return 0;
 }
-
+}
 
 int32_t GetInputFormat(FILE * inputFile, AudioFormatDescription * theInputFormat, uint32_t * theFileType)
 {
